@@ -1,76 +1,87 @@
+from unicodedata import category
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class User(db.Model):
+class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+
+    favorito = db.relationship("Favorito", back_populates = "usuario", uselist = False)
+
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
-    is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+    nombre = db.Column(db.String(50), nullable = False)
+    apellido = db.Column(db.String(50), nullable = True)
+
+
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '<Usuario %r>' % self.email
 
     def serialize(self):
         return {
             "id": self.id,
             "email": self.email,
-            # do not serialize the password, its a security breach
+            "nombre": self.nombre,
         }
 
-class Favorites(db.Model):
-    id = db.Column(db.integer, primary_key = True)
-    user_id = db.Column(db.Integer, db.ForegnKey("user.id"), nullable=False)
-    planet_id = db.Column(db.Integer, db.ForegnKey("planet.id"), nullable=False)
-    people_id = db.Column(db.Integer, db.ForegnKey("people.id"), nullable=False)
+class Favorito(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
 
-    def __repr__(self):
-        return '<Favorites %r>' % self.username
+    usuario = db.relationship("Usuario", back_populates = "favorito")
+    usuario_id = db.Column(db.Integer, db.ForeignKey("usuario.id"), nullable = False)
 
-    def serialize(self):
-        return {
-            "user_id": self.id,
-            "user_id": self.user_id,
-            "planet_id": self.planet_id,
-            "people_id": self.people_id,
-            # do not serialize the password, its a security breach
-        }
-class Planet(db.Model):
-    id = db.Column(db.integer, primary_key = True)
-    name = db.Column(db.String(250))
-    population = db.Column(db.String(250))
-    terrain = db.Column(db.String(250))
-    favorites =db.relationship("Favorites")
+    category = db.Column(db.String(50))
+    name = db.Column(db.String(50))
 
-    def __repr__(self):
-        return '<Planet %r>' % self.username
 
     def serialize(self):
         return {
             "id": self.id,
-            "name": self.name,
+            "usuario_id": self.usuario_id,
+            "category" : self.category,
+            "name" : self.name
+
+        }
+
+class Planeta(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+
+    name = db.Column(db.String(30), nullable = False)
+    population = db.Column(db.Integer, nullable = False)
+    climate = db.Column(db.String(30), nullable = False)
+    terrain = db.Column(db.String(30), nullable = False)
+    gravity = db.Column(db.String(30), nullable = False)
+
+    def __repr__(self):
+        return '<Planeta %r>' % self.name
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "nombre": self.name,
             "population": self.population,
+            "climate": self.climate,
             "terrain": self.terrain,
-            # do not serialize the password, its a security breach
+            "gravity": self.gravity
         }
 
-class People(db.Model):
-    id = db.Column(db.integer, primary_key = True)
-    name = db.Column(db.String(250))
-    gender = db.Column(db.String(250))
-    hair_color = db.Column(db.String(100))
-    eyes_color = db.Column(db.String(100))
-    favorites = relationship("favorites")
+class Personaje(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+
+    name = db.Column(db.String(30), nullable = False)
+    hair_color = db.Column(db.String(30), nullable = False)
+    eyes_color = db.Column(db.String(30), nullable = False)
+    gender = db.Column(db.String(30), nullable = False)
 
     def __repr__(self):
-        return '<People %r>' % self.username
+        return '<Personaje %r>' % self.name
 
     def serialize(self):
         return {
             "id": self.id,
-            "name": self.name,
-            "gender": self.gender,
+            "nombre": self.name,
             "hair_color": self.hair_color,
-            "eyes_color": self.eyes_color,
-            # do not serialize the password, its a security breach
+            "eye_color": self.eyes_color,
+            "gender":self.gender
         }
